@@ -92,6 +92,69 @@ void decryptFile(Crypto *crypto, char *filename, char *encryptedFilename) {
   free(file);
 }
 
+char* encryptData2File(Crypto *crypto, char *data) {
+  // Read the file to encrypt
+  size_t fileLength = strlen(data);
+  printf("%d bytes to be encrypted\n", (int)fileLength);
+
+  // Encrypt the file
+  unsigned char *encryptedFile;
+  int encryptedFileLength = crypto->aesEncrypt((const unsigned char*)data, fileLength, &encryptedFile);
+
+  if(encryptedFileLength == -1) {
+    fprintf(stderr, "Encryption failed\n");
+    exit(1);
+  }
+  printf("%d bytes encrypted\n", encryptedFileLength);
+
+  // Append .enc to the filename
+  char *encryptedFilename = "testMMF.xml";
+
+  #ifdef CONVERT_TO_BASE64
+    // Encode the encrypted file to base64
+    char *base64Buffer = base64Encode(encryptedFile, encryptedFileLength);
+
+    // Change the encrypted file pointer to the base64 string and update the length
+    free(encryptedFile);
+    encryptedFile = (unsigned char*)base64Buffer;
+    encryptedFileLength = strlen((char*)encryptedFile);
+  #endif
+
+  // Write the encrypted file to its own file
+  writeFile(encryptedFilename, encryptedFile, encryptedFileLength);
+  printf("Encrypted file written to \"%s\"\n", encryptedFilename);
+
+  return encryptedFilename;
+}
+
+unsigned char* decryptFile2Data(Crypto *crypto, char *encryptedFilename, unsigned char **decryptedData) {
+  // Read the encrypted file back
+  unsigned char *file;
+  size_t fileLength = readFile(encryptedFilename, &file);
+
+  #ifdef CONVERT_TO_BASE64
+    // Decode the encrypted file from base64
+    unsigned char *binaryBuffer;
+    fileLength = base64Decode((char*)file, fileLength, &binaryBuffer);
+
+    // Change the pointer of the string containing the file info to the decoded base64 string
+    free(file);
+    file = binaryBuffer;
+  #endif
+
+  // Decrypt the encrypted file
+  int decryptedFileLength = crypto->aesDecrypt(file, fileLength, decryptedData);
+
+  if(decryptedFileLength == -1) {
+    fprintf(stderr, "Decryption failed\n");
+    exit(1);
+  }
+  printf("%d bytes decrypted\n", (int)decryptedFileLength);
+
+
+  free(file);
+}
+
 void writeFile(char *filename, unsigned char *file, size_t fileLength) {
   FILE *fd = fopen(filename, "wb");
   if(fd == NULL) {
