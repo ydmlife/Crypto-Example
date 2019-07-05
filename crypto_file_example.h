@@ -14,7 +14,7 @@
 char* encryptFile(Crypto *crypto, char *filename);
 void decryptFile(Crypto *crypto, char *filename, char *encryptedFilename);
 
-char* encryptData2File(Crypto *crypto, char *data);
+void encryptData2File(Crypto *crypto, char *data, char *filename);
 unsigned char * decryptFile2Data(Crypto *crypto, char *encryptedFilename, unsigned char **decryptedData);
 
 void writeFile(char *filename, unsigned char *file, size_t fileLength);

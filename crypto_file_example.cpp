@@ -92,7 +92,7 @@ void decryptFile(Crypto *crypto, char *filename, char *encryptedFilename) {
   free(file);
 }
 
-char* encryptData2File(Crypto *crypto, char *data) {
+void encryptData2File(Crypto *crypto, char *data, char *filename) {
   // Read the file to encrypt
   size_t fileLength = strlen(data);
   printf("%d bytes to be encrypted\n", (int)fileLength);
@@ -107,9 +107,6 @@ char* encryptData2File(Crypto *crypto, char *data) {
   }
   printf("%d bytes encrypted\n", encryptedFileLength);
 
-  // Append .enc to the filename
-  char *encryptedFilename = "testMMF.xml";
-
   #ifdef CONVERT_TO_BASE64
     // Encode the encrypted file to base64
     char *base64Buffer = base64Encode(encryptedFile, encryptedFileLength);
@@ -121,11 +118,10 @@ char* encryptData2File(Crypto *crypto, char *data) {
   #endif
 
   // Write the encrypted file to its own file
-  writeFile(encryptedFilename, encryptedFile, encryptedFileLength);
-  printf("Encrypted file written to \"%s\"\n", encryptedFilename);
-
-  return encryptedFilename;
+  writeFile(filename, encryptedFile, encryptedFileLength);
+  printf("Encrypted file written to \"%s\"\n", filename);
 }
+
 
 unsigned char* decryptFile2Data(Crypto *crypto, char *encryptedFilename, unsigned char **decryptedData) {
   // Read the encrypted file back
